@@ -19,15 +19,32 @@ const userSchema = new Schema(
         },
         password: {
             type: String,
-            required: [true, 'Password is required']
+            type: String,
+            required: function () {
+                return !this.googleId; // Password required only for non-OAuth users
+            },
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,  // `sparse` allows some users to have this field null
+        },
+        profileImage: {
+            type: String,
         },
         age: {
             type: Number,
-          },
+        },
+        lastLogin:{
+            type:Date,
+            default:Date.now(),
+        },
+        accessToken: {
+            type: String
+        },
         refreshToken: {
             type: String
         }
-
     },
     {
         timestamps: true,
