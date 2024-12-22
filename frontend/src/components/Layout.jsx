@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dumbbell, Activity, PieChart, Plus, Menu, X } from "lucide-react";
+import { Dumbbell, Activity, PieChart, Plus, Menu, X, User } from "lucide-react";
 import { useNavigate, Outlet } from "react-router-dom";
 import { Button } from "./ui/button";
 import Logout from "./Logout";
@@ -44,10 +44,11 @@ const Layout = ({ showAddWorkout, setShowAddWorkout, refreshDashboard, setRefres
             animate={{ x: 0 }}
             exit={{ x: -300 }}
             transition={{ type: "spring", bounce: 0.4 }}
-            className={`fixed lg:relative w-64 bg-black h-screen overflow-y-auto z-40 
+            className={`fixed lg:relative w-64 bg-gradient-to-b from-black to-gray-950 h-screen overflow-y-auto z-40 
               ${isSidebarOpen ? "block" : "hidden lg:block"} ${
               window.innerWidth < 1024 ? 'bg-opacity-75 backdrop-blur-sm' : ''
             }`}
+            style={{ opacity: window.innerWidth < 1024 ? 0.9 : 1 }} // Reduce opacity on mobile screens
           >
             <div className="p-6 pt-20 lg:pt-6">
               <div className="hidden lg:flex items-center space-x-2 mb-8">
@@ -91,6 +92,16 @@ const Layout = ({ showAddWorkout, setShowAddWorkout, refreshDashboard, setRefres
                     navigate("/progress");
                   }}
                 />
+                <NavItem
+                  icon={<User />}
+                  label="Profile"
+                  active={activeTab === "profile"}
+                  onClick={() => {
+                    setActiveTab("profile");
+                    if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                    navigate("/profile");
+                  }}
+                />
                 <div className="border-t border-gray-700 pt-4">
                   <Logout />
                 </div>
@@ -103,10 +114,7 @@ const Layout = ({ showAddWorkout, setShowAddWorkout, refreshDashboard, setRefres
       {/* Main Content */}
       <div className="flex-1 overflow-auto pt-20 lg:pt-0">
         <div className="p-4 md:p-8">
-          <header className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-white">
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-            </h2>
+          <header className="flex justify-end items-center mb-8">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={() => setShowAddWorkout(true)}

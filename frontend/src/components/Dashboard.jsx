@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 import { Flame, Dumbbell, Timer, Loader2 } from 'lucide-react';
-import { getUserDashboard } from '../auth.js'; 
+import { getUserDashboard, getWorkoutsByDate } from '../auth.js'; 
+import BodyStat from './BodyStat';
 
 const Dashboard = ({ refresh, setRefresh }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pieChartData, setPieChartData] = useState([]);
 
   const fetchDashboardData = async () => {
     try {
@@ -20,13 +22,24 @@ const Dashboard = ({ refresh, setRefresh }) => {
     }
   };
 
+  const fetchWorkoutsByDate = async (date) => {
+    try {
+      const data = await getWorkoutsByDate(date);
+      setPieChartData(data.pieChartData);
+    } catch (error) {
+      console.error('Error fetching workouts by date:', error);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardData();
+    fetchWorkoutsByDate(new Date());
   }, []);
 
   useEffect(() => {
     if (refresh) {
       fetchDashboardData();
+      fetchWorkoutsByDate(new Date());
       setRefresh(false);
     }
   }, [refresh, setRefresh]);
@@ -36,12 +49,12 @@ const Dashboard = ({ refresh, setRefresh }) => {
   }
 
   const {
-    pieChartData,
     totalCaloriesBurnt,
     totalWorkouts,
     avgCaloriesBurntPerWorkout,
     totalActiveMinutes,
     totalWeeksCaloriesBurnt,
+    bodyPartStats,
   } = dashboardData;
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#845EC2', '#FF6F91', '#FFC75F'];
@@ -141,18 +154,17 @@ const Dashboard = ({ refresh, setRefresh }) => {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                   <XAxis
                     dataKey="name"
-                    stroke="white"
-                    fontSize={12}
+                    tick={{ fill: '#888888' }}
                     tickLine={false}
-                    axisLine={true}
+                    axisLine={false}
                   />
                   <YAxis
-                    stroke="white"
-                    fontSize={12}
+                    tick={{ fill: '#888888' }}
                     tickLine={false}
-                    axisLine={true}
+                    axisLine={false}
                     tickFormatter={(value) => `${value}`}
                   />
                   <Tooltip
@@ -160,6 +172,7 @@ const Dashboard = ({ refresh, setRefresh }) => {
                       backgroundColor: 'black',
                       border: 'solid 1px',
                       borderRadius: '18px',
+                      padding: '8px',
                     }}
                   />
                   <Line
@@ -167,7 +180,13 @@ const Dashboard = ({ refresh, setRefresh }) => {
                     dataKey="calories"
                     stroke="#8b5cf6"
                     strokeWidth={2}
-                    dot={false}
+                    dot={{ fill: '#8b5cf6', r: 4 }}
+                    activeDot={{ r: 6, fill: '#a78bfa' }}
+                    isAnimationActive={true}
+                    animationBegin={0}
+                    animationDuration={3000}
+                    animationEasing="ease-in-out"
+                    animationId="line-chart"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -192,6 +211,10 @@ const Dashboard = ({ refresh, setRefresh }) => {
                     outerRadius={100}
                     fill="#8884d8"
                     label={({ label, value }) => `${label}: ${value}`}
+                    isAnimationActive={true}
+                    animationBegin={0}
+                    animationDuration={3000}
+                    animationEasing="ease-in-out"
                   >
                     {pieChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -211,6 +234,9 @@ const Dashboard = ({ refresh, setRefresh }) => {
             </div>
           </motion.div>
         </motion.div>
+
+      {/* Body Part Stats */}
+      <BodyStat bodyPartStats={bodyPartStats} />
     </div>
   );
 };

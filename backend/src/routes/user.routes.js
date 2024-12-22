@@ -1,9 +1,6 @@
 import {Router} from "express"
-import {registerUser,loginUser,logoutUser,getCurrentUser,refreshAccessToken,addWorkout,getUserDashboard,getWorkoutsByDate,calculateProgress } from "../controllers/User.controller.js";
+import {registerUser,loginUser,logoutUser,getCurrentUser,refreshAccessToken,addWorkout,getUserDashboard,getWorkoutsByDate,calculateProgress,getUserProfile, checkAuth, getExercisesByBodyPart } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-
-// const router = express.Router();
-
 
 const router=Router()
 
@@ -16,9 +13,8 @@ router.route("/workout").get(verifyJWT,getWorkoutsByDate)
 router.route("/workout").post(verifyJWT,addWorkout)
 router.route("/refresh-token").post(refreshAccessToken)
 router.route("/progress/:id").get(verifyJWT,calculateProgress)
-// router.route("/fetch").get(verifyJWT,fetchFitnessData);
-// router.route("/history").get(verifyJWT,getFitnessData);
-  
-
+router.route("/profile").get(verifyJWT, getUserProfile) // Add route for getting user profile
+router.route("/check-auth").get(verifyJWT, checkAuth)
+router.route("/exercises/:bodyPart").get(getExercisesByBodyPart)
 
 export default router

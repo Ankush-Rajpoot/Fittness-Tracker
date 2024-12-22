@@ -198,154 +198,17 @@ const getCurrentUser = asyncHandler(async(req, res) => {
     ))
 })
 
-// const getUserDashboard = async (req, res, next) => {
-//     try {
-//       const userId = req.user?._id;
-//       const user = await User.findById(userId);
-//       if (!user) {
-//         throw new ApiError(404,"User not found")
-//       }
-  
-//       const currentDateFormatted = new Date();
-//       const startToday = new Date(
-//         currentDateFormatted.getFullYear(),
-//         currentDateFormatted.getMonth(),
-//         currentDateFormatted.getDate()
-//       );
-//       const endToday = new Date(
-//         currentDateFormatted.getFullYear(),
-//         currentDateFormatted.getMonth(),
-//         currentDateFormatted.getDate() + 1
-//       );
-  
-//       //calculte total calories burnt
-//       const totalCaloriesBurnt = await Workout.aggregate([
-//         { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
-//         {
-//           $group: {
-//             _id: null,
-//             totalCaloriesBurnt: { $sum: "$caloriesBurned" },
-//           },
-//         },
-//       ]);
-  
-//       //Calculate total no of workouts
-//       const totalWorkouts = await Workout.countDocuments({
-//         user: userId,
-//         date: { $gte: startToday, $lt: endToday },
-//       });
-  
-//       //Calculate average calories burnt per workout
-//       const avgCaloriesBurntPerWorkout =
-//         totalCaloriesBurnt.length > 0
-//           ? totalCaloriesBurnt[0].totalCaloriesBurnt / totalWorkouts
-//           : 0;
-  
-//       // Fetch category of workouts
-//       const categoryCalories = await Workout.aggregate([
-//         { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
-//         {
-//           $group: {
-//             _id: "$category",
-//             totalCaloriesBurnt: { $sum: "$caloriesBurned" },
-//           },
-//         },
-//       ]);
-  
-//       //Format category data for pie chart
-  
-//       const pieChartData = categoryCalories.map((category, index) => ({
-//         id: index,
-//         value: category.totalCaloriesBurnt,
-//         label: category._id,
-//       }));
-  
-//       const weeks = [];
-//       const caloriesBurnt = [];
-//       for (let i = 6; i >= 0; i--) {
-//         const date = new Date(
-//           currentDateFormatted.getTime() - i * 24 * 60 * 60 * 1000
-//         );
-//         weeks.push(`${date.getDate()}th`);
-  
-//         const startOfDay = new Date(
-//           date.getFullYear(),
-//           date.getMonth(),
-//           date.getDate()
-//         );
-//         const endOfDay = new Date(
-//           date.getFullYear(),
-//           date.getMonth(),
-//           date.getDate() + 1
-//         );
-  
-//         const weekData = await Workout.aggregate([
-//           {
-//             $match: {
-//               user: user._id,
-//               date: { $gte: startOfDay, $lt: endOfDay },
-//             },
-//           },
-//           {
-//             $group: {
-//               _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-//               totalCaloriesBurnt: { $sum: "$caloriesBurned" },
-//             },
-//           },
-//           {
-//             $sort: { _id: 1 }, // Sort by date in ascending order
-//           },
-//         ]);
-  
-//         caloriesBurnt.push(
-//           weekData[0]?.totalCaloriesBurnt ? weekData[0]?.totalCaloriesBurnt : 0
-//         );
-//       }
-  
-//       return res
-//       .status(200)
-//       .json({
-//         totalCaloriesBurnt:
-//           totalCaloriesBurnt.length > 0
-//             ? totalCaloriesBurnt[0].totalCaloriesBurnt
-//             : 0,
-//         totalWorkouts: totalWorkouts,
-//         avgCaloriesBurntPerWorkout: avgCaloriesBurntPerWorkout,
-//         totalWeeksCaloriesBurnt: {
-//           weeks: weeks,
-//           caloriesBurned: caloriesBurnt,
-//         },
-//         pieChartData: pieChartData,
-//       });
-//     }
-//     catch (err) {
-//       next(err);
-//     }
-//   };
-  
 const getUserDashboard = async (req, res, next) => {
   try {
     const userId = req.user?._id;
     const user = await User.findById(userId);
     if (!user) {
-      throw new ApiError(404,"User not found")
+      throw new ApiError(404, "User not found");
     }
-
-    const currentDateFormatted = new Date();
-    const startToday = new Date(
-      currentDateFormatted.getFullYear(),
-      currentDateFormatted.getMonth(),
-      currentDateFormatted.getDate()
-    );
-    const endToday = new Date(
-      currentDateFormatted.getFullYear(),
-      currentDateFormatted.getMonth(),
-      currentDateFormatted.getDate() + 1
-    );
 
     // Calculate total calories burnt
     const totalCaloriesBurnt = await Workout.aggregate([
-      { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+      { $match: { user: user._id } },
       {
         $group: {
           _id: null,
@@ -357,7 +220,6 @@ const getUserDashboard = async (req, res, next) => {
     // Calculate total number of workouts
     const totalWorkouts = await Workout.countDocuments({
       user: userId,
-      date: { $gte: startToday, $lt: endToday },
     });
 
     // Calculate average calories burnt per workout
@@ -368,7 +230,7 @@ const getUserDashboard = async (req, res, next) => {
 
     // Calculate total active minutes (sum of durations)
     const totalActiveMinutes = await Workout.aggregate([
-      { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+      { $match: { user: user._id } },
       {
         $group: {
           _id: null,
@@ -379,52 +241,58 @@ const getUserDashboard = async (req, res, next) => {
 
     // Fetch category of workouts
     const categoryCalories = await Workout.aggregate([
-      { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+      { $match: { user: user._id } },
       {
         $group: {
           _id: "$category",
           totalCaloriesBurnt: { $sum: "$caloriesBurned" },
+          totalWorkouts: { $sum: 1 },
         },
       },
     ]);
 
-    // Format category data for pie chart
+    // Format category data for pie chart and stats
     const pieChartData = categoryCalories.map((category, index) => ({
       id: index,
       value: category.totalCaloriesBurnt,
       label: category._id,
     }));
 
-   // Correct day mapping logic for backend
-const weeks = [];
-const caloriesBurnt = [];
-for (let i = 6; i >= 0; i--) {
-  const date = new Date();
-  date.setDate(date.getDate() - i);
-  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const bodyPartStats = categoryCalories.map((category) => ({
+      bodyPart: category._id,
+      totalCaloriesBurnt: category.totalCaloriesBurnt,
+      totalWorkouts: category.totalWorkouts,
+    }));
 
-  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    // Correct day mapping logic for backend
+    const weeks = [];
+    const caloriesBurnt = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
 
-  const dayData = await Workout.aggregate([
-    {
-      $match: {
-        user: user._id,
-        date: { $gte: startOfDay, $lt: endOfDay },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalCaloriesBurnt: { $sum: '$caloriesBurned' },
-      },
-    },
-  ]);
+      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
-  weeks.push(dayName);
-  caloriesBurnt.push(dayData[0]?.totalCaloriesBurnt || 0);
-}
+      const dayData = await Workout.aggregate([
+        {
+          $match: {
+            user: user._id,
+            date: { $gte: startOfDay, $lt: endOfDay },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalCaloriesBurnt: { $sum: '$caloriesBurned' },
+          },
+        },
+      ]);
 
+      weeks.push(dayName);
+      caloriesBurnt.push(dayData[0]?.totalCaloriesBurnt || 0);
+    }
 
     // Send response including total active minutes
     return res.status(200).json({
@@ -440,44 +308,72 @@ for (let i = 6; i >= 0; i--) {
         caloriesBurned: caloriesBurnt,
       },
       pieChartData: pieChartData,
+      bodyPartStats: bodyPartStats, // Include body part stats
     });
   } catch (err) {
     next(err);
   }
 };
 
-
 const getWorkoutsByDate = async (req, res, next) => {
-    try {
-        const userId = req.user?._id;
-        const user = await User.findById(userId);
-        let date = req.query.date ? new Date(req.query.date) : new Date();
+  try {
+    const userId = req.user?._id;
+    const user = await User.findById(userId);
+    let date = req.query.date ? new Date(req.query.date) : new Date();
 
-        if (!user) {
-            throw new ApiError(404, "User not found");
-        }
-
-        // Set start and end of the day to cover the full day
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        // Query the workouts based on the user and date range
-        const todaysWorkouts = await Workout.find({
-            user: userId, // Adjust field name if necessary
-            createdAt: { $gte: startOfDay, $lt: endOfDay }, // Make sure the field name matches
-        });
-
-        // Calculate the total calories burnt
-        const totalCaloriesBurnt = todaysWorkouts.reduce(
-            (total, workout) => total + workout.caloriesBurned, 0
-        );
-
-        return res.status(200).json({ todaysWorkouts, totalCaloriesBurnt });
-    } catch (err) {
-        next(err);
+    if (!user) {
+      throw new ApiError(404, "User not found");
     }
+
+    // Set start and end of the day to cover the full day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Query the workouts based on the user and date range
+    const todaysWorkouts = await Workout.find({
+      user: userId, // Adjust field name if necessary
+      createdAt: { $gte: startOfDay, $lt: endOfDay }, // Make sure the field name matches
+    });
+
+    // Calculate the total calories burnt
+    const totalCaloriesBurnt = todaysWorkouts.reduce(
+      (total, workout) => total + workout.caloriesBurned, 0
+    );
+
+    // Calculate total active minutes
+    const totalActiveMinutes = todaysWorkouts.reduce(
+      (total, workout) => total + workout.duration, 0
+    );
+
+    // Group workouts by category for pie chart
+    const categoryCalories = await Workout.aggregate([
+      { $match: { user: user._id, createdAt: { $gte: startOfDay, $lt: endOfDay } } },
+      {
+        $group: {
+          _id: "$category",
+          totalCaloriesBurnt: { $sum: "$caloriesBurned" },
+        },
+      },
+    ]);
+
+    // Format category data for pie chart
+    const pieChartData = categoryCalories.map((category, index) => ({
+      id: index,
+      value: category.totalCaloriesBurnt,
+      label: category._id,
+    }));
+
+    return res.status(200).json({ 
+      todaysWorkouts, 
+      totalCaloriesBurnt, 
+      totalActiveMinutes, 
+      pieChartData 
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const addWorkout = asyncHandler(async (req, res) => {
@@ -523,9 +419,8 @@ const addWorkout = asyncHandler(async (req, res) => {
   });
 });
 
-
 const updateProgress = async (userId, workout) => {
-  const { category, sets, reps, weight } = workout;
+  const { category, sets, reps, weight, workoutName } = workout;
 
   let progress = await Progress.findOne({ userId, bodyPart: category });
 
@@ -533,7 +428,7 @@ const updateProgress = async (userId, workout) => {
     progress.totalWeight += weight;
     progress.totalSets += sets;
     progress.totalReps += reps;
-    progress.entries.push({ date: new Date(), weight, sets, reps });
+    progress.entries.push({ date: new Date(), weight, sets, reps, workoutName });
     progress.latestDate = new Date();
   } else {
     progress = new Progress({
@@ -542,7 +437,7 @@ const updateProgress = async (userId, workout) => {
       totalWeight: weight,
       totalSets: sets,
       totalReps: reps,
-      entries: [{ date: new Date(), weight, sets, reps }],
+      entries: [{ date: new Date(), weight, sets, reps, workoutName }],
     });
   }
 
@@ -580,14 +475,13 @@ const calculateProgress = asyncHandler(async (req, res) => {
       entries: entries.map((entry) => ({
         date: new Date(entry.date).toISOString(),
         weight: entry.weight,
+        workoutName: entry.workoutName || 'Unknown', // Ensure workout name is included
       })),
     };
   });
 
   res.status(200).json(insights);
 });
-
-
 
 // Parse workout line
 const parseWorkoutLine = parts => ({
@@ -620,6 +514,60 @@ const checkAuth = asyncHandler(async (req, res) => {
 	}
 });
 
+const getUserProfile = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const user = await User.findById(userId).select("-password -refreshToken -accessToken");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+console.log(user);
+  // Calculate current streak
+  const today = new Date();
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+  const workoutsToday = await Workout.find({
+    user: userId,
+    createdAt: { $gte: startOfDay, $lt: endOfDay },
+  });
+
+  const currentStreak = workoutsToday.length > 0 ? user.currentStreak + 1 : user.currentStreak;
+
+  res.status(200).json(new ApiResponse(200, {
+    fullName: user.fullName,
+    email: user.email,
+    joinedDate: user.createdAt,
+    lastLogin: user.lastLogin,
+    currentStreak: currentStreak,
+  }, "User profile fetched successfully"));
+});
+
+const getExercisesByBodyPart = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const { bodyPart } = req.params;
+
+  if (!bodyPart) {
+    throw new ApiError(400, "Body part is required");
+  }
+
+  const exercises = await Workout.find({ user: userId, category: bodyPart });
+
+  if (!exercises.length) {
+    throw new ApiError(404, "No exercises found for this body part");
+  }
+
+  const exerciseData = exercises.map((exercise) => ({
+    name: exercise.workoutName,
+    caloriesBurned: exercise.caloriesBurned,
+    sets: exercise.sets,
+    reps: exercise.reps,
+  }));
+  console.log(exerciseData);
+
+  res.status(200).json(new ApiResponse(200, exerciseData, "Exercises fetched successfully"));
+});
+
 export {
     registerUser,
     loginUser,
@@ -633,5 +581,8 @@ export {
     calculateCaloriesBurnt,
     calculateProgress,
     generateAccessAndRefereshTokens,
-    checkAuth
+    checkAuth,
+    getUserProfile,
+    updateProgress,
+    getExercisesByBodyPart
 }

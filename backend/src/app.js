@@ -56,6 +56,7 @@ passport.use(
         "profile",
         "email",
       ],
+      prompt: "select_account", // Add this line
     },
     async (googleAccessToken, googleRefreshToken, profile, done) => {
       try {
@@ -109,6 +110,9 @@ app.get(
       secure: true,
     };
 
+    // Set a flag indicating Google login
+    req.session.isGoogleLogin = true;
+
     res
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
@@ -125,14 +129,24 @@ app.get("/login/success", async (req, res) => {
 });
 
 app.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
-    res.redirect(process.env.CORS_ORIGIN);
-  });
+  if (req.session.isGoogleLogin) {
+    req.logout(function (err) {
+      if (err) {
+        return next(err);
+      }
+      req.session.destroy((err) => {
+        if (err) {
+          return next(err);
+        }
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+        res.redirect(process.env.CORS_ORIGIN);
+      });
+    });
+  } else {
+    // Redirect to the user controller logout endpoint
+    res.redirect("/api/v1/users/logout");
+  }
 });
 
 // routes import

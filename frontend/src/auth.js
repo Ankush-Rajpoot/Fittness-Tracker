@@ -15,7 +15,7 @@ export const loginUser = async (credentials) => {
 };
 
 export const logoutUser = async () => {
-  const response = await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+  const response = await axios.get("http://localhost:5000/logout", { withCredentials: true });
   return response.data;
 };
 
@@ -35,8 +35,6 @@ export const getCurrentUser = async () => {
   });
   return response.data;
 };
-
-
 
 // Get Dashboard Data
 export const getUserDashboard = async () => {
@@ -68,6 +66,22 @@ export const addWorkout = async (workoutString) => {
 // Calculate Progress
 export const calculateProgress = async (userId) => {
   const response = await axios.get(`${API_URL}/progress/${userId}`, {
+    withCredentials: true,
+  });
+  return response.data;
+};
+
+// Get User Profile
+export const getUserProfile = async () => {
+  const response = await axios.get(`${API_URL}/profile`, {
+    withCredentials: true,
+  });
+  return response.data;
+};
+
+// Get Exercises by Body Part
+export const getExercisesByBodyPart = async (bodyPart) => {
+  const response = await axios.get(`${API_URL}/exercises/${bodyPart}`, {
     withCredentials: true,
   });
   return response.data;

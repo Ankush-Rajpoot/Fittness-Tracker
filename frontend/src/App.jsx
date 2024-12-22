@@ -8,10 +8,13 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Layout from "./components/Layout";
 import OnboardingScreen from "./components/Onboarding/OnboardingScreen"; // Import OnboardingScreen component
+import Profile from "./components/Profile"; // Import Profile component
 
 function App() {
   const [showAddWorkout, setShowAddWorkout] = useState(false);
   const [refreshDashboard, setRefreshDashboard] = useState(false);
+  const [refreshWorkouts, setRefreshWorkouts] = useState(false);
+  const [refreshProgress, setRefreshProgress] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true); // Add state for onboarding
   const location = useLocation(); // Get the current route
 
@@ -33,6 +36,8 @@ function App() {
   const handleWorkoutAdded = () => {
     setShowAddWorkout(false);
     setRefreshDashboard(true); // Trigger dashboard refresh
+    setRefreshWorkouts(true); // Trigger workouts refresh
+    setRefreshProgress(true); // Trigger progress refresh
   };
 
   if (showOnboarding) {
@@ -56,8 +61,9 @@ function App() {
           }
         >
           <Route path="dashboard" element={<Dashboard refresh={refreshDashboard} setRefresh={setRefreshDashboard} />} />
-          <Route path="workouts" element={<Workouts />} />
-          <Route path="progress" element={<Progress />} />
+          <Route path="workouts" element={<Workouts refresh={refreshWorkouts} setRefresh={setRefreshWorkouts} />} />
+          <Route path="progress" element={<Progress refresh={refreshProgress} setRefresh={setRefreshProgress} />} />
+          <Route path="profile" element={<Profile />} /> {/* Add Profile route */}
         </Route>
       </Routes>
 

@@ -30,7 +30,7 @@ const Signup = () => {
   },[isAuthenticated,navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#111111]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 to-black px-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

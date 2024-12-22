@@ -53,7 +53,7 @@ const DetailedChart = ({ data, bodyPart }) => (
               borderRadius: "8px",
               padding: "8px",
             }}
-            formatter={(value) => [`${value} kg`, 'Weight']}
+            formatter={(value, name, props) => [`${value} kg`, `${props.payload.workoutName}`]}
           />
           <Legend />
           <Line
@@ -133,7 +133,7 @@ const ProgressCard = ({ record, index, onToggleDetails, isExpanded }) => (
   </motion.div>
 );
 
-const Progress = () => {
+const Progress = ({ refresh, setRefresh }) => {
   const [userId, setUserId] = useState(null);
   const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -171,8 +171,13 @@ const Progress = () => {
         };
       
         if (userId) fetchProgress();
-      }, [userId]);
-      
+      }, [userId, refresh]);
+
+      useEffect(() => {
+        if (refresh) {
+          setRefresh(false);
+        }
+      }, [refresh, setRefresh]);
 
   const handleToggleDetails = (bodyPart) => {
     setExpandedCard(expandedCard === bodyPart ? null : bodyPart);

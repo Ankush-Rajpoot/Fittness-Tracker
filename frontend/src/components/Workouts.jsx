@@ -4,7 +4,7 @@ import { format, addDays, subDays } from 'date-fns';
 import { getWorkoutsByDate } from '../auth.js'; 
 import gsap from 'gsap';
 
-const Workouts = () => {
+const Workouts = ({ refresh, setRefresh }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,6 @@ const Workouts = () => {
     const fetchWorkouts = async () => {
       setLoading(true);
       try {
-        
         const data = await getWorkoutsByDate(format(selectedDate, 'yyyy-MM-dd'));
         setWorkouts(data.todaysWorkouts || []);
       } catch (error) {
@@ -26,8 +25,13 @@ const Workouts = () => {
     };
 
     fetchWorkouts();
-  }, [selectedDate]);
+  }, [selectedDate, refresh]);
 
+  useEffect(() => {
+    if (refresh) {
+      setRefresh(false);
+    }
+  }, [refresh, setRefresh]);
 
   const handleMouseEnterCard = (index) => {
     gsap.to(cardsRef.current[index], {
