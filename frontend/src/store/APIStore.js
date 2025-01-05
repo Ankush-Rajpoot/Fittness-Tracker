@@ -115,4 +115,46 @@ export const userStore = create((set) => ({
       set({ error: "Error calculating progress", isLoading: false });
     }
   },
+
+  verifyEmail: async (code) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/verify-email`, { code });
+      set({ user: response.data.user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || "Error verifying email", isLoading: false });
+      throw error;
+    }
+  },
+
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/forgot-password`, { email });
+      set({ message: response.data.message, isLoading: false });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Error sending reset password email",
+      });
+      throw error;
+    }
+  },
+
+  // Reset password function
+  resetPassword: async (token, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/reset-password/${token}`, { password });
+      set({ message: response.data.message, isLoading: false });
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Error resetting password",
+      });
+      throw error;
+    }
+  },
+
+
 }));

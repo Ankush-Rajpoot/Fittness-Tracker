@@ -2,14 +2,21 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-import { Flame, Dumbbell, Timer, Loader2 } from 'lucide-react';
+import { Flame, Dumbbell, Timer, Calendar, TrendingUp } from 'lucide-react';
 import { getUserDashboard, getWorkoutsByDate } from '../auth.js'; 
 import BodyStat from './BodyStat';
+import { Skeleton } from "@/components/ui/skeleton"
 
 const Dashboard = ({ refresh, setRefresh }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pieChartData, setPieChartData] = useState([]);
+  const [dailyStats, setDailyStats] = useState({
+    totalCaloriesBurnt: 0,
+    totalWorkouts: 0,
+    totalActiveMinutes: 0,
+    avgCaloriesBurntPerWorkout: 0,
+  });
 
   const fetchDashboardData = async () => {
     try {
@@ -26,6 +33,12 @@ const Dashboard = ({ refresh, setRefresh }) => {
     try {
       const data = await getWorkoutsByDate(date);
       setPieChartData(data.pieChartData);
+      setDailyStats({
+        totalCaloriesBurnt: data.totalCaloriesBurnt,
+        totalWorkouts: data.todaysWorkouts.length,
+        totalActiveMinutes: data.totalActiveMinutes,
+        avgCaloriesBurntPerWorkout: data.totalCaloriesBurnt / data.todaysWorkouts.length || 0,
+      });
     } catch (error) {
       console.error('Error fetching workouts by date:', error);
     }
@@ -45,7 +58,25 @@ const Dashboard = ({ refresh, setRefresh }) => {
   }, [refresh, setRefresh]);
 
   if (loading) {
-     return <Loader2 className="animate-spin" />;
+    return (
+      <div className="space-y-6">
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-24 bg-gray-800 rounded-xl" />
+          ))}
+        </div>
+
+        {/* Weekly Progress Chart Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+          <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+        </div>
+
+        {/* Body Part Stats Skeleton */}
+        <Skeleton className="h-[400px] bg-gray-800 rounded-xl" />
+      </div>
+    );
   }
 
   const {
@@ -53,6 +84,8 @@ const Dashboard = ({ refresh, setRefresh }) => {
     totalWorkouts,
     avgCaloriesBurntPerWorkout,
     totalActiveMinutes,
+    totalActiveDays,
+    currentStreak,
     totalWeeksCaloriesBurnt,
     bodyPartStats,
   } = dashboardData;
@@ -68,37 +101,51 @@ const Dashboard = ({ refresh, setRefresh }) => {
     {
       icon: <Flame className="h-6 w-6 text-orange-500" />,
       label: 'Calories Burned',
-      value: totalCaloriesBurnt,
-      change: '+12.5%',
+      value: dailyStats.totalCaloriesBurnt,
       color: 'text-orange-500',
+      border: true,
     },
     {
       icon: <Dumbbell className="h-6 w-6 text-purple-500" />,
       label: 'Workouts',
-      value: totalWorkouts,
-      change: '+3',
+      value: dailyStats.totalWorkouts,
       color: 'text-purple-500',
+      border: true,
     },
     {
       icon: <Timer className="h-6 w-6 text-green-500" />,
       label: 'Active Minutes',
-      value: totalActiveMinutes,
-      change: '+45',
+      value: dailyStats.totalActiveMinutes,
       color: 'text-green-500',
+      border: true,
     },
     {
       icon: <Dumbbell className="h-6 w-6 text-blue-500" />,
       label: 'Avg Calories per Workout',
-      value: avgCaloriesBurntPerWorkout,
-      change: '+5%',
+      value: dailyStats.avgCaloriesBurntPerWorkout.toFixed(2),
       color: 'text-blue-500',
+      border: true,
+    },
+    {
+      icon: <Calendar className="h-6 w-6 text-yellow-500" />,
+      label: 'Active Days',
+      value: totalActiveDays,
+      color: 'text-yellow-500',
+      border: true,
+    },
+    {
+      icon: <TrendingUp className="h-6 w-6 text-pink-500" />,
+      label: 'Current Streak',
+      value: currentStreak,
+      color: 'text-pink-500',
+      border: true,
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -106,7 +153,7 @@ const Dashboard = ({ refresh, setRefresh }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.01 }}
             whileHover={{ scale: 1.05 }}
-            className="bg-black rounded-xl p-6 cursor-pointer"
+            className={`bg-black rounded-xl p-6 cursor-pointer ${stat.border ? 'border border-gray-800' : ''}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -125,14 +172,6 @@ const Dashboard = ({ refresh, setRefresh }) => {
                   <h3 className={`text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
                 </div>
               </div>
-              <motion.span
-                className="text-green-500"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                {stat.change}
-              </motion.span>
             </div>
           </motion.div>
         ))}

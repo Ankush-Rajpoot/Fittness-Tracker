@@ -4,6 +4,7 @@ import { Dumbbell, Activity, PieChart, Plus, Menu, X, User } from "lucide-react"
 import { useNavigate, Outlet } from "react-router-dom";
 import { Button } from "./ui/button";
 import Logout from "./Logout";
+import Chatbot from './chatBot';
 
 const Layout = ({ showAddWorkout, setShowAddWorkout, refreshDashboard, setRefreshDashboard }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -128,6 +129,7 @@ const Layout = ({ showAddWorkout, setShowAddWorkout, refreshDashboard, setRefres
 
           <main>
             <Outlet />
+            <Chatbot />
           </main>
         </div>
       </div>

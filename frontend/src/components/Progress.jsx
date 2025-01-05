@@ -17,8 +17,7 @@ import {
 } from 'recharts';
 import { Calendar, Dumbbell, Hash, Repeat, TrendingUp, Loader2, AlertCircle, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react';
 import { calculateProgress, getCurrentUser } from "../auth"; 
-
-
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DetailedChart = ({ data, bodyPart }) => (
   <motion.div
@@ -183,7 +182,32 @@ const Progress = ({ refresh, setRefresh }) => {
     setExpandedCard(expandedCard === bodyPart ? null : bodyPart);
   };
 
-  if (loading) return <Loader2 className="animate-spin" />;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {/* Overall Progress Skeleton */}
+        <div className="bg-gray-800 rounded-xl p-6">
+          <Skeleton className="h-6 w-1/3 mb-4" />
+          <Skeleton className="h-[400px]" />
+        </div>
+
+        {/* Progress Cards Skeleton */}
+        <div className="grid grid-cols-1 gap-6">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-gray-800 rounded-xl p-6">
+              <Skeleton className="h-6 w-1/2 mb-4" />
+              <Skeleton className="h-6 w-1/3 mb-2" />
+              <Skeleton className="h-6 w-1/4 mb-2" />
+              <Skeleton className="h-6 w-1/4 mb-2" />
+              <Skeleton className="h-6 w-1/4 mb-2" />
+              <Skeleton className="h-6 w-1/4 mb-2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <AlertCircle className="text-red-400" />;
   if (!progressData?.length) return <ClipboardList />;
 

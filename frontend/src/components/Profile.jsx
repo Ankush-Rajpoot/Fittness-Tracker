@@ -106,30 +106,9 @@ const Profile = () => {
           </div>
         </div>
       </motion.div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        {[
-          { label: 'Total Workouts', value: '48', color: 'from-red-600 to-red-800' },
-          { label: 'Hours Trained', value: '86', color: 'from-orange-600 to-red-600' },
-          { label: 'Calories Burned', value: '12,480', color: 'from-yellow-600 to-orange-600' },
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-black rounded-xl p-6 shadow-lg"
-          >
-            <div className={`text-3xl font-bold mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-              {stat.value}
-            </div>
-            <div className="text-gray-400">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>
     </div>
   );
 };
 
 export default Profile;
+

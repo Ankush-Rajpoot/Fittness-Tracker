@@ -1,9 +1,10 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { userStore } from "../store/APIStore.js";
 import { useNavigate } from "react-router-dom";
-
+import * as THREE from 'three';
+import VANTA from 'vanta/dist/vanta.rings.min.js';
 
 const Signup = () => {
   const [fullName, setFullName] = useState("");
@@ -13,24 +14,55 @@ const Signup = () => {
   const error = userStore((state) => state.error);
   const isAuthenticated = userStore((state) => state.isAuthenticated);
   const navigate = useNavigate();
+  const vantaRef = useRef(null);
 
-  const signUpWithGoogle = ()=>{
-    window.open("http://localhost:5000/auth/google/callback","_self")
-}
+  const signUpWithGoogle = () => {
+    window.open("http://localhost:5000/auth/google/callback", "_self");
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     registerUser({ fullName, email, password });
   };
 
-  useEffect(()=>{
-    if(isAuthenticated){
-      navigate("/dashboard")
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
     }
-  },[isAuthenticated,navigate])
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const setVanta = () => {
+      if (window.VANTA) {
+        window.VANTA.RINGS({
+          el: vantaRef.current,
+          THREE,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          backgroundColor: 0x0,
+          color: 0xc019d1
+        });
+      }
+    };
+
+    setVanta();
+    window.addEventListener("resize", setVanta);
+
+    return () => {
+      window.removeEventListener("resize", setVanta);
+      if (window.VANTA && window.VANTA.current) {
+        window.VANTA.current.destroy();
+      }
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 to-black px-4">
+    <div ref={vantaRef} className="min-h-screen flex items-center justify-center bg-black px-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -85,13 +117,13 @@ const Signup = () => {
           </motion.button>
         </form>
         <div className="flex justify-center">
-        <p className="switch">
-        Already have an account? <Link to="/login" className="switch-btn">Login</Link>
-      </p>
+          <p className="switch">
+            Already have an account? <Link to="/login" className="switch-btn">Login</Link>
+          </p>
         </div>
-      <div className="flex justify-center">
-      <button className='login-with-google-btn' onClick={signUpWithGoogle}>Sign In With Google</button>
-      </div>
+        <div className="flex justify-center">
+          <button className='login-with-google-btn' onClick={signUpWithGoogle}>Sign In With Google</button>
+        </div>
       </motion.div>
     </div>
   );

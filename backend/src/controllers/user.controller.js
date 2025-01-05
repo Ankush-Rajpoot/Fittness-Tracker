@@ -230,14 +230,18 @@ const getUserDashboard = async (req, res, next) => {
 
     // Calculate total active minutes (sum of durations)
     const totalActiveMinutes = await Workout.aggregate([
-      { $match: { user: user._id } },
+      { $match: { user: userId } },
       {
         $group: {
-          _id: null,
+          _id: userId,
           totalActiveMinutes: { $sum: "$duration" },
         },
       },
     ]);
+    console.log(totalActiveMinutes);
+
+    
+
 
     // Fetch category of workouts
     const categoryCalories = await Workout.aggregate([
@@ -267,6 +271,25 @@ const getUserDashboard = async (req, res, next) => {
     // Correct day mapping logic for backend
     const weeks = [];
     const caloriesBurnt = [];
+    const totalActiveDaysResult = await Workout.aggregate([
+      { $match: { user: userId } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+        },
+      },
+      {
+        $count: "totalActiveDays",
+      },
+    ]);
+    const totalActiveDays = totalActiveDaysResult.length > 0 ? totalActiveDaysResult[0].totalActiveDays : 0;
+    let currentStreak = 0;
+    let streakBroken = false;
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -279,19 +302,28 @@ const getUserDashboard = async (req, res, next) => {
         {
           $match: {
             user: user._id,
-            date: { $gte: startOfDay, $lt: endOfDay },
+            createdAt: { $gte: startOfDay, $lt: endOfDay },
           },
         },
         {
           $group: {
-            _id: null,
+            _id: userId,
             totalCaloriesBurnt: { $sum: '$caloriesBurned' },
+            totalActiveMinutes: { $sum: '$duration' },
           },
         },
       ]);
-
+      // console.log(dayData);
       weeks.push(dayName);
       caloriesBurnt.push(dayData[0]?.totalCaloriesBurnt || 0);
+
+      if (dayData.length > 0) {
+        if (dayName !== 'Sun' && !streakBroken) {
+          currentStreak++;
+        }
+      } else if (dayName !== 'Sun' && dayData.length === 0) {
+        streakBroken = true;
+      }
     }
 
     // Send response including total active minutes
@@ -303,6 +335,8 @@ const getUserDashboard = async (req, res, next) => {
       totalWorkouts: totalWorkouts,
       avgCaloriesBurntPerWorkout: avgCaloriesBurntPerWorkout,
       totalActiveMinutes: totalActiveMinutes.length > 0 ? totalActiveMinutes[0].totalActiveMinutes : 0, // Include active minutes here
+      totalActiveDays: totalActiveDays,
+      currentStreak: currentStreak,
       totalWeeksCaloriesBurnt: {
         weeks: weeks,
         caloriesBurned: caloriesBurnt,
@@ -521,7 +555,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-console.log(user);
+
   // Calculate current streak
   const today = new Date();
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -531,15 +565,48 @@ console.log(user);
     user: userId,
     createdAt: { $gte: startOfDay, $lt: endOfDay },
   });
+  // console.log(workoutsToday);
 
-  const currentStreak = workoutsToday.length > 0 ? user.currentStreak + 1 : user.currentStreak;
+  const currentStreak = workoutsToday.length > 0 ? user.currentStreak + 1 : 0;
+// console.log(currentStreak);
+  // Calculate total active days including Sundays
+  const totalActiveDays = await Workout.aggregate([
+    { $match: { user: userId } },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+          day: { $dayOfMonth: "$createdAt" },
+        },
+      },
+    },
+    {
+      $count: "totalActiveDays",
+    },
+  ]);
+  console.log(totalActiveDays);
 
-  res.status(200).json(new ApiResponse(200, {
+  // Calculate total active minutes
+  const totalActiveMinutes = await Workout.aggregate([
+    { $match: { user: userId } },
+    {
+      $group: {
+        _id: null,
+        totalActiveMinutes: { $sum: "$duration" },
+      },
+    },
+  ]);
+  console.log(totalActiveMinutes);
+
+  res.status(200).json(new ApiResponse(200,{
     fullName: user.fullName,
     email: user.email,
     joinedDate: user.createdAt,
     lastLogin: user.lastLogin,
     currentStreak: currentStreak,
+    totalActiveDays: totalActiveDays.length > 0 ? totalActiveDays[0].totalActiveDays : 0,
+    totalActiveMinutes: totalActiveMinutes.length > 0 ? totalActiveMinutes[0].totalActiveMinutes : 0,
   }, "User profile fetched successfully"));
 });
 

@@ -152,9 +152,11 @@ app.get("/logout", (req, res, next) => {
 // routes import
 import userRouter from "./routes/user.routes.js";
 import fitnessRouter from "./routes/fitness.routes.js";
+import openaiRouter from "./routes/openai.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/openai", openaiRouter); // Add this line
 // app.use("/api/v1/fitness", fitnessRouter);
 
 export { app };
