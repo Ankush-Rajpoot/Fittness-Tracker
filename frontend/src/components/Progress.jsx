@@ -14,61 +14,104 @@ import {
   Radar,
   CartesianGrid,
   Legend,
+  Brush,
 } from 'recharts';
 import { Calendar, Dumbbell, Hash, Repeat, TrendingUp, Loader2, AlertCircle, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react';
-import { calculateProgress, getCurrentUser } from "../auth"; 
+import { calculateProgress, getCurrentUser, getExercisesByDateAndBodyPart } from "../auth"; 
 import { Skeleton } from "@/components/ui/skeleton";
+import DayExercise from './DayExercise.jsx';
 
-const DetailedChart = ({ data, bodyPart }) => (
-  <motion.div
-    initial={{ opacity: 0, height: 0 }}
-    animate={{ opacity: 1, height: 'auto' }}
-    exit={{ opacity: 0, height: 0 }}
-    transition={{ duration: 0.3 }}
-    className="mt-6 bg-gradient-to-b from-gray-900 to-black rounded-xl p-6"
-  >
-    <h4 className="text-lg font-semibold text-white mb-4">{bodyPart} Progress Timeline</h4>
-    <div className="h-[400px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-          <XAxis
-            dataKey="date"
-            tick={{ fill: '#888888' }}
-            tickFormatter={(value) => new Date(value).toLocaleDateString()}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            tick={{ fill: '#888888' }}
-            tickLine={false}
-            axisLine={false}
-            label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft', fill: '#888888' }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#1a1a1a",
-              border: "1px solid #444",
-              borderRadius: "8px",
-              padding: "8px",
+const DetailedChart = ({ data, bodyPart }) => {
+  const [hoveredData, setHoveredData] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [exercises, setExercises] = useState([]);
+
+  // Aggregate data by date
+  const aggregatedData = data.reduce((acc, entry) => {
+    const date = new Date(entry.date).toLocaleDateString();
+    if (!acc[date]) {
+      acc[date] = { date, weight: 0, exercises: [] };
+    }
+    acc[date].weight += entry.weight;
+    acc[date].exercises.push({
+      workoutName: entry.workoutName,
+      reps: entry.reps,
+      sets: entry.sets,
+      duration: entry.duration,
+      caloriesBurned: entry.caloriesBurned,
+    });
+    return acc;
+  }, {});
+
+  const chartData = Object.values(aggregatedData);
+
+  const fetchExercises = async (date) => {
+    try {
+      const response = await getExercisesByDateAndBodyPart(date, bodyPart);
+      setExercises(response.data);
+      // console.log("Exercises:", response.data);
+    } catch (error) {
+      console.error("Error fetching exercises:", error);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3 }}
+      className="mt-6 bg-gradient-to-b from-gray-900 to-black rounded-xl p-6 relative"
+    >
+      <h4 className="text-lg font-semibold text-white mb-4">{bodyPart} Progress Timeline</h4>
+      <div className="h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={chartData}
+            onMouseMove={(e) => {
+              if (e.isTooltipActive) {
+                const { chartX, chartY } = e;
+                setTooltipPosition({ top: chartY - 50, left: chartX + 20 });
+                setHoveredData(e.activePayload ? e.activePayload[0].payload : null);
+                fetchExercises(e.activePayload[0].payload.date);
+              } else {
+                setHoveredData(null);
+              }
             }}
-            formatter={(value, name, props) => [`${value} kg`, `${props.payload.workoutName}`]}
-          />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="weight"
-            name="Weight"
-            stroke="#8b5cf6"
-            strokeWidth={2}
-            dot={{ fill: '#8b5cf6', r: 4 }}
-            activeDot={{ r: 6, fill: '#a78bfa' }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  </motion.div>
-);
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: '#888888' }}
+              tickFormatter={(value) => new Date(value).toLocaleDateString()}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fill: '#888888' }}
+              tickLine={false}
+              axisLine={false}
+              label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft', fill: '#888888' }}
+            />
+            <Tooltip content={<></>} />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="weight"
+              name="Weight"
+              stroke="#8b5cf6"
+              strokeWidth={2}
+              dot={{ fill: '#8b5cf6', r: 4 }}
+              activeDot={{ r: 6, fill: '#a78bfa' }}
+            />
+            {/* <Brush dataKey="date" height={30} stroke="#8884d8" /> */}
+          </LineChart>
+        </ResponsiveContainer>
+        {hoveredData && <DayExercise exercises={exercises} position={tooltipPosition} style={{ zIndex: 1000 }} />}
+      </div>
+    </motion.div>
+  );
+};
 
 const StatItem = ({ icon: Icon, label, value, className = "" }) => (
   <div className="flex items-center space-x-2 text-gray-400">
@@ -186,21 +229,21 @@ const Progress = ({ refresh, setRefresh }) => {
     return (
       <div className="space-y-6">
         {/* Overall Progress Skeleton */}
-        <div className="bg-gray-800 rounded-xl p-6">
-          <Skeleton className="h-6 w-1/3 mb-4" />
-          <Skeleton className="h-[400px]" />
+        <div className="bg-black rounded-xl p-6">
+          <Skeleton className="h-6 w-1/3 bg-gray-800 rounded mb-4" />
+          <Skeleton className="h-[400px] bg-gray-800 rounded-xl" />
         </div>
 
         {/* Progress Cards Skeleton */}
         <div className="grid grid-cols-1 gap-6">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="bg-gray-800 rounded-xl p-6">
-              <Skeleton className="h-6 w-1/2 mb-4" />
-              <Skeleton className="h-6 w-1/3 mb-2" />
-              <Skeleton className="h-6 w-1/4 mb-2" />
-              <Skeleton className="h-6 w-1/4 mb-2" />
-              <Skeleton className="h-6 w-1/4 mb-2" />
-              <Skeleton className="h-6 w-1/4 mb-2" />
+            <div key={index} className="bg-black rounded-xl p-6">
+              <Skeleton className="h-6 w-1/2 bg-gray-800 rounded mb-4" />
+              <Skeleton className="h-4 w-1/3 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
             </div>
           ))}
         </div>

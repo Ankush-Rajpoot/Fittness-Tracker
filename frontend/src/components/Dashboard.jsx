@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, Legend, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Brush } from 'recharts';
 
 import { Flame, Dumbbell, Timer, Calendar, TrendingUp } from 'lucide-react';
 import { getUserDashboard, getWorkoutsByDate } from '../auth.js'; 
@@ -63,18 +63,31 @@ const Dashboard = ({ refresh, setRefresh }) => {
         {/* Stats Grid Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-24 bg-gray-800 rounded-xl" />
+            <div key={index} className="bg-black rounded-xl p-6">
+              <Skeleton className="h-6 w-6 bg-gray-800 rounded-full mb-4" />
+              <Skeleton className="h-4 w-1/2 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-8 w-3/4 bg-gray-800 rounded" />
+            </div>
           ))}
         </div>
 
         {/* Weekly Progress Chart Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-          <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
-          <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+          <div className="bg-black rounded-xl p-4 md:p-6 shadow-lg">
+            <Skeleton className="h-6 w-1/4 bg-gray-800 rounded mb-4" />
+            <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+          </div>
+          <div className="bg-black rounded-xl p-4 md:p-6 shadow-lg">
+            <Skeleton className="h-6 w-1/4 bg-gray-800 rounded mb-4" />
+            <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+          </div>
         </div>
 
         {/* Body Part Stats Skeleton */}
-        <Skeleton className="h-[400px] bg-gray-800 rounded-xl" />
+        <div className="bg-black rounded-xl p-4 md:p-6 shadow-lg">
+          <Skeleton className="h-6 w-1/4 bg-gray-800 rounded mb-4" />
+          <Skeleton className="h-[400px] bg-gray-800 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -158,12 +171,8 @@ const Dashboard = ({ refresh, setRefresh }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 1.5,
-                    ease: 'linear',
-                  }}
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
                 >
                   {stat.icon}
                 </motion.div>
@@ -227,6 +236,7 @@ const Dashboard = ({ refresh, setRefresh }) => {
                     animationEasing="ease-in-out"
                     animationId="line-chart"
                   />
+                  {/* <Brush dataKey="name" height={0} stroke="gray" /> */}
                 </LineChart>
               </ResponsiveContainer>
             </div>

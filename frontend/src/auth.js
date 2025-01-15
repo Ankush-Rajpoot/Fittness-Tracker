@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/v1/users"; // Base URL for user routes
+const GEMINI_API_URL = "http://localhost:5000/api/v1/gemini"; // Base URL for Gemini routes
 
 export const registerUser = async (userData) => {
   const response = await axios.post(`${API_URL}/register`, userData);
@@ -84,6 +85,25 @@ export const getExercisesByBodyPart = async (bodyPart) => {
   const response = await axios.get(`${API_URL}/exercises/${bodyPart}`, {
     withCredentials: true,
   });
+  return response.data;
+};
+
+// Get Exercises by Date and Body Part
+export const getExercisesByDateAndBodyPart = async (date, bodyPart) => {
+  const response = await axios.get(`${API_URL}/exercises-by-date`, {
+    params: { date, bodyPart },
+    withCredentials: true,
+  });
+  return response.data;
+};
+
+// Chat with Gemini
+export const chatWithGemini = async (userInput) => {
+  const response = await axios.post(
+    `${GEMINI_API_URL}/chat`,
+    { userInput },
+    { withCredentials: true }
+  );
   return response.data;
 };
 

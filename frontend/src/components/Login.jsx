@@ -31,12 +31,12 @@ const Login = () => {
 
   return (
     <div className="bg-gradient-to-b from-gray-950 to-black">
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-black p-8 rounded-lg shadow-lg w-full max-w-md md:max-w-4xl md:flex md:flex-row"
+          className="bg-black  p-8 rounded-lg shadow-lg w-full max-w-md md:max-w-4xl md:flex md:flex-row"
         >
           <div className="hidden md:flex w-full md:w-1/2 justify-center relative">
             <video 
@@ -47,15 +47,15 @@ const Login = () => {
               className="rounded-lg" 
               style={{ height: "100%", width: "100%", maxHeight: "450px", objectFit: "cover" }} 
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black rounded-lg"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black rounded-lg"></div>
+            <div className="absolute  inset-0 bg-gradient-to-r from-black via-transparent to-black rounded-lg"></div>
+            <div className="absolute  inset-0 bg-gradient-to-t from-black via-transparent to-black rounded-lg"></div>
           </div>
-          <div className="w-full md:w-1/2 p-4 md:p-8">
+          <div className="w-full  md:w-1/2 p-4 md:p-8">
             <h1 className="login">Login</h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className=" space-y-6">
               {error && <p className="text-red-500">{error}</p>}
               <div>
-                <label htmlFor="email" className="block text-gray-400 mb-2">
+                <label htmlFor="email" className="block text-gray-400 mb-1">
                   Email
                 </label>
                 <input
@@ -63,11 +63,11 @@ const Login = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring focus:ring-purple-500"
+                  className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-gray-400 mb-2">
+                <label htmlFor="password" className="block text-gray-400 mb-1">
                   Password
                 </label>
                 <input
@@ -75,7 +75,7 @@ const Login = () => {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring focus:ring-purple-500"
+                  className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
               <motion.button

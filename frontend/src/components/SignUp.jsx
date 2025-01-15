@@ -67,13 +67,13 @@ const Signup = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-black p-8 rounded-lg shadow-lg w-full max-w-md"
+        className="bg-black border border-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md"
       >
         <h1 className="signUp">Sign Up</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <p className="text-red-500">{error}</p>}
           <div>
-            <label htmlFor="fullName" className="block text-gray-400 mb-2">
+            <label htmlFor="fullName" className="block text-gray-400 mb-1">
               Full Name
             </label>
             <input
@@ -81,11 +81,11 @@ const Signup = () => {
               id="fullName"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring focus:ring-purple-500"
+              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-gray-400 mb-2">
+            <label htmlFor="email" className="block text-gray-400 mb-1">
               Email
             </label>
             <input
@@ -93,11 +93,11 @@ const Signup = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring focus:ring-purple-500"
+              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-gray-400 mb-2">
+            <label htmlFor="password" className="block text-gray-400 mb-1">
               Password
             </label>
             <input
@@ -105,7 +105,7 @@ const Signup = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring focus:ring-purple-500"
+              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
           </div>
           <motion.button

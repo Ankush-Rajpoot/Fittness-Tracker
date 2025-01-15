@@ -19,7 +19,7 @@ const chatWithGPT = asyncHandler(async (req, res) => {
 
   try {
     const response = await openai.completions.create({
-      model: "gpt-3.5-turbo-instruct",
+      model: "gpt-4o-mini",
       prompt: `You are a fitness assistant. Answer the following question based on the knowledge of this fitness project: ${userInput}`,
       max_tokens: 150,
       temperature: 0.7,

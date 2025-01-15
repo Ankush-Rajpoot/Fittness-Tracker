@@ -153,10 +153,12 @@ app.get("/logout", (req, res, next) => {
 import userRouter from "./routes/user.routes.js";
 import fitnessRouter from "./routes/fitness.routes.js";
 import openaiRouter from "./routes/openai.routes.js";
+import geminiRouter from "./routes/gemini.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/openai", openaiRouter); // Add this line
+app.use("/api/v1/openai", openaiRouter);
+app.use("/api/v1/gemini", geminiRouter);
 // app.use("/api/v1/fitness", fitnessRouter);
 
 export { app };

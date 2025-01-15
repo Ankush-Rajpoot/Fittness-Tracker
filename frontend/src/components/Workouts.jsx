@@ -119,12 +119,22 @@ const Workouts = ({ refresh, setRefresh }) => {
         {/* Workouts List Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-40 bg-gray-800 rounded-xl" />
+            <div key={index} className="bg-black rounded-xl p-6">
+              <Skeleton className="h-6 w-1/2 bg-gray-800 rounded mb-4" />
+              <Skeleton className="h-4 w-1/3 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+              <Skeleton className="h-4 w-1/4 bg-gray-800 rounded mb-2" />
+            </div>
           ))}
         </div>
 
         {/* Pie Chart Skeleton */}
-        <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+        <div className="bg-black rounded-xl p-6">
+          <Skeleton className="h-6 w-1/4 bg-gray-800 rounded mb-4" />
+          <Skeleton className="h-[300px] bg-gray-800 rounded-xl" />
+        </div>
       </div>
     );
   }

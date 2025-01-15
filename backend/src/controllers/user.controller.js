@@ -459,10 +459,21 @@ const updateProgress = async (userId, workout) => {
   let progress = await Progress.findOne({ userId, bodyPart: category });
 
   if (progress) {
+    const date = new Date().toLocaleDateString();
+    const existingEntry = progress.entries.find(entry => new Date(entry.date).toLocaleDateString() === date);
+
+    if (existingEntry) {
+      existingEntry.weight += weight;
+      existingEntry.sets += sets;
+      existingEntry.reps += reps;
+      existingEntry.workoutName += `, ${workoutName}`;
+    } else {
+      progress.entries.push({ date: new Date(), weight, sets, reps, workoutName });
+    }
+
     progress.totalWeight += weight;
     progress.totalSets += sets;
     progress.totalReps += reps;
-    progress.entries.push({ date: new Date(), weight, sets, reps, workoutName });
     progress.latestDate = new Date();
   } else {
     progress = new Progress({
@@ -635,6 +646,41 @@ const getExercisesByBodyPart = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, exerciseData, "Exercises fetched successfully"));
 });
 
+const getExercisesByDateAndBodyPart = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+  const { date, bodyPart } = req.query;
+
+  if (!date || !bodyPart) {
+    throw new ApiError(400, "Date and body part are required");
+  }
+
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const exercises = await Workout.find({
+    user: userId,
+    category: bodyPart,
+    createdAt: { $gte: startOfDay, $lt: endOfDay },
+  });
+
+  if (!exercises.length) {
+    throw new ApiError(404, "No exercises found for this body part on the specified date");
+  }
+
+  const exerciseData = exercises.map((exercise) => ({
+    workoutName: exercise.workoutName,
+    reps: exercise.reps,
+    sets: exercise.sets,
+    duration: exercise.duration,
+    caloriesBurned: exercise.caloriesBurned,
+    date: exercise.createdAt, // Include the date
+  }));
+
+  res.status(200).json(new ApiResponse(200, exerciseData, "Exercises fetched successfully"));
+});
+
 export {
     registerUser,
     loginUser,
@@ -651,5 +697,6 @@ export {
     checkAuth,
     getUserProfile,
     updateProgress,
-    getExercisesByBodyPart
+    getExercisesByBodyPart,
+    getExercisesByDateAndBodyPart
 }

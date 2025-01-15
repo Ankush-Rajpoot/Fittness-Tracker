@@ -1,5 +1,5 @@
 import {Router} from "express"
-import {registerUser,loginUser,logoutUser,getCurrentUser,refreshAccessToken,addWorkout,getUserDashboard,getWorkoutsByDate,calculateProgress,getUserProfile, checkAuth, getExercisesByBodyPart} from "../controllers/user.controller.js";
+import {registerUser,loginUser,logoutUser,getCurrentUser,refreshAccessToken,addWorkout,getUserDashboard,getWorkoutsByDate,calculateProgress,getUserProfile, checkAuth, getExercisesByBodyPart,getExercisesByDateAndBodyPart} from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router=Router()
@@ -16,6 +16,8 @@ router.route("/progress/:id").get(verifyJWT,calculateProgress)
 router.route("/profile").get(verifyJWT, getUserProfile) // Add route for getting user profile
 router.route("/check-auth").get(verifyJWT, checkAuth)
 router.route("/exercises/:bodyPart").get(getExercisesByBodyPart)
+
+router.route("/exercises-by-date").get(verifyJWT, getExercisesByDateAndBodyPart)
 //email verification
 // router.route("/verify-email").post(verifyEmail)
 // router.route("/forgot-password").post(forgotPassword)

@@ -4,12 +4,14 @@ import { Send } from 'lucide-react';
 import ChatMessage from './chatMessage.jsx';
 import { Button } from '../ui/button';
 import axios from 'axios';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ChatWindow = ({ isOpen }) => {
   const [messages, setMessages] = useState([
     { text: "Hi! I'm your fitness assistant. How can I help you today?", isUser: false }
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +21,10 @@ const ChatWindow = ({ isOpen }) => {
     setMessages(prev => [...prev, { text: input, isUser: true }]);
     const userInput = input;
     setInput('');
+    setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/v1/openai/chat", { userInput });
+      const res = await axios.post("http://localhost:5000/api/v1/gemini/chat", { userInput });
       const botResponse = res.data.data.response;
 
       // Add bot response
@@ -29,6 +32,8 @@ const ChatWindow = ({ isOpen }) => {
     } catch (error) {
       console.error("Error fetching response from OpenAI:", error);
       setMessages(prev => [...prev, { text: "Sorry, something went wrong. Please try again later.", isUser: false }]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,11 +46,6 @@ const ChatWindow = ({ isOpen }) => {
           exit={{ opacity: 0, y: 20 }}
           className="fixed bottom-24 right-6 w-96 h-[600px] bg-gradient-to-b from-black to-gray-950 rounded-lg shadow-xl border border-gray-800 flex flex-col"
         >
-          {/* Header
-          <div className="p-4 border-b border-purple-600">
-            <h3 className="text-lg font-semibold">Fitness Assistant</h3>
-          </div> */}
-
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
@@ -55,6 +55,12 @@ const ChatWindow = ({ isOpen }) => {
                 isUser={message.isUser}
               />
             ))}
+            {loading && (
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-10 w-10 rounded-full bg-gray-800" />
+                <Skeleton className="h-6 w-3/4 bg-gray-800 rounded" />
+              </div>
+            )}
           </div>
 
           {/* Input */}
