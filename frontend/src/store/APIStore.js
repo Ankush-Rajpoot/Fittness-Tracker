@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 // Set the base API URL
 const API_URL = "http://localhost:5000/api/v1/users";
@@ -34,6 +35,10 @@ export const userStore = create((set) => ({
       const response = await axios.post(`${API_URL}/login`, credentials);
       set({ user: response.data, isAuthenticated: true, isLoading: false });
     } catch (error) {
+      if (error.response?.data?.message === 'Refresh token is expired or used') {
+        const navigate = useNavigate();
+        navigate('/login');
+      }
       set({ error: error.response?.data?.message || "Error logging in", isLoading: false });
     }
   },

@@ -2,6 +2,20 @@ import { motion } from 'framer-motion';
 import { User, Bot } from 'lucide-react';
 
 const ChatMessage = ({ message, isUser }) => {
+  const formatMessage = (text) => {
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    return lines.map((line, index) => {
+      if (line.startsWith('*')) {
+        return (
+          <li key={index} className="list-disc list-inside">
+            {line.substring(1).trim()}
+          </li>
+        );
+      }
+      return <p key={index}>{line}</p>;
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -16,7 +30,9 @@ const ChatMessage = ({ message, isUser }) => {
       <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
         isUser ? 'bg-gray-600 text-white' : 'bg-gray-800 text-gray-100'
       }`}>
-        {message}
+        <ul className="space-y-1">
+          {formatMessage(message)}
+        </ul>
       </div>
     </motion.div>
   );

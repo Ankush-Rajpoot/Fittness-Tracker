@@ -5,11 +5,13 @@ import { userStore } from "../store/APIStore.js";
 import { useNavigate } from "react-router-dom";
 import * as THREE from 'three';
 import VANTA from 'vanta/dist/vanta.rings.min.js';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const registerUser = userStore((state) => state.registerUser);
   const error = userStore((state) => state.error);
   const isAuthenticated = userStore((state) => state.isAuthenticated);
@@ -100,13 +102,22 @@ const Signup = () => {
             <label htmlFor="password" className="block text-gray-400 mb-1">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#222222] text-white p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           <motion.button
             type="submit"
@@ -116,13 +127,16 @@ const Signup = () => {
             Sign Up
           </motion.button>
         </form>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-1">
           <p className="switch">
             Already have an account? <Link to="/login" className="switch-btn">Login</Link>
           </p>
         </div>
-        <div className="flex justify-center">
-          <button className='login-with-google-btn' onClick={signUpWithGoogle}>Sign In With Google</button>
+        <div className="flex justify-center mt-1">
+          <button className='login-with-google-btn shine border border-gray-700' onClick={signUpWithGoogle}>Sign In With Google
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 hover:opacity-30 transition-opacity duration-500"></div>
+          </button>
+          
         </div>
       </motion.div>
     </div>

@@ -5,6 +5,8 @@ import { getWorkoutsByDate } from '../auth.js';
 import gsap from 'gsap';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar as ReactCalendar } from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#845EC2', '#FF6F91', '#FFC75F'];
 
@@ -106,14 +108,16 @@ const Workouts = ({ refresh, setRefresh }) => {
     setActiveIndex(index);
   };
 
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 px-4 lg:px-16">
-        {/* Date Navigation Skeleton */}
-        <div className="flex items-center justify-between bg-black rounded-xl p-4 shadow-md">
-          <Skeleton className="h-10 w-10 rounded-lg" />
-          <Skeleton className="h-6 w-48 rounded-lg" />
-          <Skeleton className="h-10 w-10 rounded-lg" />
+        {/* Calendar Skeleton */}
+        <div className="bg-black rounded-xl p-4 shadow-md">
+          <Skeleton className="h-80 w-full rounded-lg" />
         </div>
 
         {/* Workouts List Skeleton */}
@@ -141,28 +145,19 @@ const Workouts = ({ refresh, setRefresh }) => {
 
   return (
     <div className="space-y-6 px-4 lg:px-16">
-      {/* Date Navigation */}
-      <div className="flex items-center justify-between bg-black rounded-xl p-4 shadow-md">
-        <button
-          onClick={() => setSelectedDate(subDays(selectedDate, 1))}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-transform transform hover:scale-110"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-5 w-5 text-purple-500" />
-          <span className="text-lg font-medium">
-            {format(selectedDate, 'MMMM d, yyyy')}
-          </span>
-        </div>
-
-        <button
-          onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-transform transform hover:scale-110"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
+      {/* Calendar */}
+      <div className="bg-black rounded-xl p-4 shadow-md">
+        <ReactCalendar
+          onChange={handleDateChange}
+          value={selectedDate}
+          className="bg-gradient-to-b from-gray-950 to-black text-white border-none rounded-lg p-2"
+          tileClassName={({ date, view }) => 
+            view === 'month' && date.getDate() === selectedDate.getDate() ? 'bg-purple-700 text-white rounded-lg' : 'bg-gray-800 text-white rounded-lg'
+          }
+          tileContent={({ date, view }) => 
+            view === 'month' && date.getDate() === selectedDate.getDate() ? <div className="bg-purple-500 w-full h-full rounded-lg"></div> : null
+          }
+        />
       </div>
 
       {/* Workouts List */}

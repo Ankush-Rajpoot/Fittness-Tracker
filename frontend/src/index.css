@@ -114,8 +114,8 @@ h2::after {
 /* login-btn-google */
 .login-with-google-btn {
   cursor: pointer;
-  padding: 12px 16px 1px 38px;
-  border-radius: 10px;
+  padding: 12px 16px 12px 38px;
+  border-radius: 20px;
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
@@ -124,6 +124,40 @@ h2::after {
   background-size: 12%;
   background-repeat: no-repeat;
   background-position: 12px 11px;
+}
+
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine::before {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  content: "";
+  display: block;
+  height: 100%;
+  left: -75%;
+  position: absolute;
+  top: 0;
+  transform: skewX(-25deg);
+  width: 50%;
+  z-index: 2;
+  animation: shine 2s infinite;
+}
+
+.shine:hover::before {
+  animation: none;
+}
+
+@keyframes shine {
+  100% {
+    left: 125%;
+  }
 }
 
 

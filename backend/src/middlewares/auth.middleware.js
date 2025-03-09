@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { generateAccessAndRefereshTokens } from '../controllers/user.controller.js';
 
-export const verifyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -41,8 +41,11 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
           req.cookies.accessToken = accessToken;
           req.cookies.refreshToken = newRefreshToken;
           req.user = refreshedUser;
-          return verifyJWT(req, _, next);
+          return verifyJWT(req, res, next);
         } catch (error) {
+          if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Refresh token is expired or used' });
+          }
           throw new ApiError(401, error?.message || "Invalid refresh token");
         }
       }
